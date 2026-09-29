@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal AI Explainer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- ── Header ── -->
+    <header class="header">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+        </div>
+        <div>
+          <h1 class="title">Universal AI Explainer</h1>
+          <p class="subtitle">Instant Smart AI Explanations</p>
+        </div>
+      </div>
+      <div class="header-right-actions" style="display:flex;align-items:center;gap:6px;">
+        <button type="button" id="openSidePanelBtn" class="btn-icon-header" title="Open in persistent Chrome Side Panel" aria-label="Open Side Panel">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="15" y1="3" x2="15" y2="21"></line>
+          </svg>
+        </button>
+        <span class="badge" id="statusBadge">Checking...</span>
+      </div>
+    </header>
+
+    <!-- ── Navigation Tabs ── -->
+    <nav class="tabs-nav" role="tablist">
+      <button type="button" class="tab-btn active" role="tab" id="tabExplainBtn" data-tab="tab-explain" aria-selected="true">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        <span>Chat</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tabJarvisBtn" data-tab="tab-jarvis" aria-selected="false">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <span>Jarvis</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tabTranslateBtn" data-tab="tab-translate" aria-selected="false">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <span>Translate</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tabQuizBtn" data-tab="tab-quiz" aria-selected="false">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+          <line x1="6" y1="12" x2="10" y2="12"></line>
+          <line x1="8" y1="10" x2="8" y2="14"></line>
+          <circle cx="15" cy="11" r="1"></circle>
+          <circle cx="17" cy="13" r="1"></circle>
+        </svg>
+        <span>Quiz</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tabHistoryBtn" data-tab="tab-history" aria-selected="false">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>History</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" id="tabSettingsBtn" data-tab="tab-settings" aria-selected="false">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- ══════════════════════════════════════════════════
+         Tab 1: Chat / Explain
+    ══════════════════════════════════════════════════ -->
+    <div id="tab-explain" class="tab-pane active" role="tabpanel">
+
+      <!-- Interactive Animated Avatar Mentor Bar -->
+      <div class="popup-avatar-bar" id="popupAvatarBar">
+        <div class="popup-avatar-companion state-idle" id="popupAvatarCompanion">
+          <div class="popup-avatar-aura"></div>
+          <svg class="popup-avatar-svg" viewBox="0 0 64 64" fill="none">
+            <circle class="avatar-halo" cx="32" cy="7" r="4" fill="#38bdf8"/>
+            <line x1="32" y1="11" x2="32" y2="16" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round"/>
+            <rect x="10" y="16" width="44" height="40" rx="16" fill="#1e293b" stroke="#818cf8" stroke-width="2"/>
+            <rect x="14" y="20" width="36" height="32" rx="11" fill="#090d16"/>
+            <circle cx="18" cy="38" r="2.5" fill="#f43f5e" opacity="0.65"/>
+            <circle cx="46" cy="38" r="2.5" fill="#f43f5e" opacity="0.65"/>
+            <g class="avatar-eyes">
+              <ellipse class="avatar-eye left-eye" cx="24" cy="31" rx="3.5" ry="4.5" fill="#38bdf8"/>
+              <ellipse class="avatar-eye right-eye" cx="40" cy="31" rx="3.5" ry="4.5" fill="#38bdf8"/>
+              <circle cx="25" cy="30" r="1.2" fill="#ffffff"/>
+              <circle cx="41" cy="30" r="1.2" fill="#ffffff"/>
+            </g>
+            <path class="avatar-mouth" d="M26 41 Q32 46 38 41" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          </svg>
+          <div class="popup-soundwaves" id="popupSoundwaves">
+            <span class="psw-bar"></span><span class="psw-bar"></span><span class="psw-bar"></span><span class="psw-bar"></span>
+          </div>
+        </div>
+        <div class="popup-avatar-info">
+          <div class="popup-avatar-name-row">
+            <span class="popup-avatar-name">Maya • AI Mentor</span>
+            <span class="popup-avatar-badge" id="popupAvatarBadge">🇮🇳 Indian English</span>
+          </div>
+          <p class="popup-avatar-subtext" id="popupAvatarSubtext">Ask anything or paste text — I explain simply with relatable analogies!</p>
+        </div>
+      </div>
+
+      <!-- Quick AI Source Switcher -->
+      <div class="quick-source-bar" style="display:flex;align-items:center;justify-content:space-between;background:rgba(30,41,59,0.5);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:5px 10px;margin-bottom:10px;font-size:11px;">
+        <span style="color:#94a3b8;display:flex;align-items:center;gap:5px;">
+          <span>AI Model:</span>
+          <strong id="activeAiLabel" style="color:#22c55e;">🦙 Ollama</strong>
+        </span>
+        <div style="display:flex;gap:4px;">
+          <button type="button" class="btn-source-toggle" id="quickOllamaBtn" title="Switch to local Ollama" style="padding:3px 8px;border-radius:5px;border:1px solid rgba(34,197,94,0.4);background:rgba(34,197,94,0.18);color:#22c55e;font-size:10px;font-weight:600;cursor:pointer;">🦙 Ollama</button>
+          <button type="button" class="btn-source-toggle" id="quickGeminiBtn" title="Switch to Google Gemini" style="padding:3px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#94a3b8;font-size:10px;font-weight:600;cursor:pointer;">✨ Gemini</button>
+          <button type="button" class="btn-source-toggle" id="quickAutoBtn" title="Auto fallback" style="padding:3px 8px;border-radius:5px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#94a3b8;font-size:10px;font-weight:600;cursor:pointer;">⚡ Auto</button>
+        </div>
+      </div>
+
+      <!-- Chat message window -->
+      <div id="chatWindow" class="chat-window">
+        <!-- Empty state shown on first open -->
+        <div id="chatEmptyState" class="chat-empty-state">
+          <div class="chat-empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <p class="chat-empty-title">Ask me anything!</p>
+          <p class="chat-empty-subtitle">Paste text, code, or highlight something on the page and I'll explain it — then ask follow-up questions naturally.</p>
+          <div class="chat-quick-actions">
+            <button type="button" class="chat-quick-chip" data-prompt="What is recursion in programming?">💡 Explain recursion</button>
+            <button type="button" class="chat-quick-chip" data-prompt="What does async/await mean?">⚡ async/await</button>
+            <button type="button" class="chat-quick-chip" data-prompt="What is machine learning?">🤖 Machine Learning</button>
+          </div>
+        </div>
+        <!-- Chat bubbles injected here by JS -->
+      </div>
+
+      <!-- Suggested follow-up chips (hidden until AI replies) -->
+      <div id="suggestionsBar" class="suggestions-bar" style="display:none;">
+        <span class="suggestions-label">Follow up</span>
+        <!-- Chips injected by JS -->
+      </div>
+
+      <!-- Input area -->
+      <div class="chat-input-area">
+        <!-- Live Voice Recognizer Banner -->
+        <div id="voiceActiveBanner" class="voice-active-banner">
+          <div class="voice-live-indicator">
+            <span class="voice-pulse-dot"></span>
+            <span id="voiceBannerText">Listening... Speak now</span>
+          </div>
+          <button type="button" id="voiceStopBtn" class="voice-stop-chip">Done</button>
+        </div>
+
+        <div class="chat-input-row">
+          <div class="chat-input-wrapper">
+            <textarea
+              id="chatInput"
+              class="chat-textarea"
+              placeholder="Ask anything or use Voice 🎙️..."
+              rows="1"
+              autocomplete="off"
+              spellcheck="true"
+            ></textarea>
+            <button type="button" id="grabSelectionBtn" class="grab-btn-inline" title="Grab highlighted text from page">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </button>
+            <button type="button" id="popupPageTldrBtn" class="grab-btn-inline" title="30-Second Page TL;DR Briefing">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </button>
+          </div>
+          <button type="button" id="voiceInputBtn" class="voice-input-btn" title="Speak to Ask (Voice Recognizer)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </button>
+          <button type="button" id="sendBtn" class="send-btn" title="Send (Enter)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+        <div class="chat-action-row">
+          <button type="button" id="newChatBtn" class="new-chat-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 .49-3.5"></path>
+            </svg>
+            New Chat
+          </button>
+          <button type="button" id="startLiveTalkBtn" class="btn-live-talk" title="Maya Live Talk — Hands-Free Conversational Loop">
+            <span class="live-pulse-dot"></span>
+            <span>🎙️ Live Talk</span>
+          </button>
+          <div class="chat-lang-picker" style="display:inline-flex; align-items:center; gap:5px; margin-left:auto;">
+            <label for="chatLanguageSelect" style="font-size:11px; color:#94a3b8; margin:0;">Language:</label>
+            <select id="chatLanguageSelect" class="input" style="padding:2px 6px; font-size:11px; width:auto; height:24px; border-radius:6px; cursor:pointer;">
+              <option value="English" selected>English</option>
+              <option value="Hindi">हिन्दी (Hindi)</option>
+              <option value="Bengali">বাংলা (Bengali)</option>
+              <option value="Telugu">తెలుగు (Telugu)</option>
+              <option value="Tamil">தமிழ் (Tamil)</option>
+              <option value="Marathi">मराठी (Marathi)</option>
+              <option value="Gujarati">ગુજરાતી (Gujarati)</option>
+              <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
+              <option value="Malayalam">മലയാളം (Malayalam)</option>
+              <option value="Punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
+              <option value="Spanish">Español (Spanish)</option>
+              <option value="French">Français (French)</option>
+              <option value="German">Deutsch (German)</option>
+              <option value="Japanese">日本語 (Japanese)</option>
+              <option value="Chinese">中文 (Chinese)</option>
+              <option value="Arabic">العربية (Arabic)</option>
+            </select>
+          </div>
+          <span class="char-hint" id="charHint"></span>
+        </div>
+      </div>
+
+    </div><!-- /tab-explain -->
+
+    <!-- ══════════════════════════════════════════════════
+         Tab 2: Live Multilingual Translator
+    ══════════════════════════════════════════════════ -->
+    <div id="tab-translate" class="tab-pane" role="tabpanel">
+      <div class="translate-container">
+        <div class="translate-header-row">
+          <span class="section-title">Instant AI Translator</span>
+          <div class="trans-lang-select-group">
+            <label for="transTargetLang" class="field-hint" style="margin:0;">To:</label>
+            <select id="transTargetLang" class="trans-select">
+              <option value="Hindi" selected>🇮🇳 Hindi (हिन्दी)</option>
+              <option value="Bengali">🇮🇳 Bengali (বাংলা)</option>
+              <option value="Telugu">🇮🇳 Telugu (తెలుగు)</option>
+              <option value="Tamil">🇮🇳 Tamil (தமிழ்)</option>
+              <option value="Marathi">🇮🇳 Marathi (मराठी)</option>
+              <option value="Gujarati">🇮🇳 Gujarati (ગુજરાતી)</option>
+              <option value="Kannada">🇮🇳 Kannada (ಕನ್ನಡ)</option>
+              <option value="Malayalam">🇮🇳 Malayalam (മലയാളം)</option>
+              <option value="Punjabi">🇮🇳 Punjabi (ਪੰਜਾਬੀ)</option>
+              <option value="Urdu">Urdu (اردو)</option>
+              <option value="English">🇬🇧 English</option>
+              <option value="Spanish">🇪🇸 Spanish (Español)</option>
+              <option value="French">🇫🇷 French (Français)</option>
+              <option value="German">🇩🇪 German (Deutsch)</option>
+              <option value="Japanese">🇯🇵 Japanese (日本語)</option>
+              <option value="Chinese">🇨🇳 Chinese (中文)</option>
+              <option value="Arabic">🇸🇦 Arabic (العربية)</option>
+              <option value="Russian">🇷🇺 Russian (Русский)</option>
+              <option value="Portuguese">🇧🇷 Portuguese (Português)</option>
+              <option value="Italian">🇮🇹 Italian (Italiano)</option>
+              <option value="Korean">🇰🇷 Korean (한국어)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="translate-input-wrapper">
+          <textarea
+            id="transInput"
+            class="trans-textarea"
+            placeholder="Type or paste text in any language to translate..."
+            rows="3"
+          ></textarea>
+          <div class="trans-input-actions">
+            <button type="button" id="transVoiceBtn" class="trans-chip-btn" title="Speak to enter text">
+              🎙️ Speak
+            </button>
+            <button type="button" id="transGrabBtn" class="trans-chip-btn" title="Grab selection from page">
+              📋 Grab from Page
+            </button>
+            <button type="button" id="transClearBtn" class="trans-chip-btn" title="Clear text">
+              ✕ Clear
+            </button>
+          </div>
+        </div>
+
+        <button type="button" id="executeTranslateBtn" class="btn btn-primary" style="margin-top: 10px;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+          <span id="executeTranslateText">Translate Now</span>
+        </button>
+
+        <!-- Output Result Card -->
+        <div id="transResultCard" class="trans-result-card" style="display:none;">
+          <div class="trans-result-header">
+            <span class="trans-result-lang" id="transResultLangBadge">Hindi</span>
+            <div class="trans-result-actions">
+              <button type="button" id="transSpeakBtn" class="bubble-action-btn" title="Listen">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                <span id="transSpeakBtnText">Listen</span>
+              </button>
+              <button type="button" id="transCopyBtn" class="bubble-action-btn" title="Copy translation">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span>Copy</span>
+              </button>
+            </div>
+          </div>
+          <div id="transResultText" class="trans-result-text"></div>
+        </div>
+      </div>
+    </div><!-- /tab-translate -->
+
+    <!-- ══════════════════════════════════════════════════
+         Tab: Gamified Learning / Quiz Mode
+    ══════════════════════════════════════════════════ -->
+    <div id="tab-quiz" class="tab-pane" role="tabpanel">
+      <!-- Confetti Canvas Layer -->
+      <canvas id="popupConfettiCanvas" class="popup-confetti-canvas"></canvas>
+
+      <div class="quiz-panel-wrapper">
+        <!-- Hero Quiz Header -->
+        <div class="quiz-hero-card">
+          <div class="quiz-hero-header">
+            <span class="quiz-hero-icon">🎮</span>
+            <div>
+              <div class="quiz-hero-title">Gamified Learning Quiz</div>
+              <div class="quiz-hero-sub">Generate 3 interactive MCQs from any page or text &amp; earn confetti!</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Setup Section (Input & Source Selection) -->
+        <div id="quizSetupSection" class="quiz-setup-card">
+          <div class="quiz-input-label-row">
+            <span class="section-title">Article or Concept Text</span>
+            <span class="quiz-badge-mini">AI-Powered</span>
+          </div>
+
+          <textarea
+            id="quizInputText"
+            class="trans-textarea"
+            placeholder="Paste text, enter a topic, or click 'Grab from Page'..."
+            rows="4"
+          ></textarea>
+
+          <div class="quiz-input-actions">
+            <button type="button" id="quizGrabBtn" class="trans-chip-btn" title="Grab selection or article from active tab">
+              📋 Grab from Page
+            </button>
+            <button type="button" id="quizClearBtn" class="trans-chip-btn" title="Clear input">
+              ✕ Clear
+            </button>
+          </div>
+
+          <button type="button" id="startQuizBtn" class="btn btn-primary" style="margin-top: 12px; width: 100%;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span id="startQuizBtnText">🎮 Test My Knowledge</span>
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="quizLoadingState" class="quiz-loading-card" style="display:none;">
+          <div class="spinner"></div>
+          <div class="quiz-loading-title">Maya is crafting your quiz...</div>
+          <div class="quiz-loading-sub">3 interactive questions based on your text</div>
+        </div>
+
+        <!-- Interactive Question State -->
+        <div id="quizActiveCard" class="quiz-active-card" style="display:none;">
+          <div class="quiz-top-bar">
+            <span class="quiz-progress-badge" id="popupQuizProgressBadge">🎯 Question 1 of 3</span>
+            <span class="quiz-score-badge" id="popupQuizScoreBadge">⭐ Score: 0 / 3</span>
+          </div>
+
+          <div class="quiz-progress-bar-track">
+            <div class="quiz-progress-bar-fill" id="popupQuizProgressFill" style="width: 33%;"></div>
+          </div>
+
+          <div class="quiz-question-box" id="popupQuizQuestionText">Question text goes here?</div>
+
+          <div class="quiz-options-grid" id="popupQuizOptionsGrid">
+            <!-- Populated via popup.js -->
+          </div>
+
+          <div id="popupQuizFeedbackArea"></div>
+        </div>
+
+        <!-- Final Summary Screen -->
+        <div id="quizSummaryCard" class="quiz-summary-card-popup" style="display:none;">
+          <div class="quiz-trophy-icon" id="popupQuizTrophy">🏆</div>
+          <div class="quiz-summary-title" id="popupQuizSummaryTitle">Quiz Master!</div>
+          <div class="quiz-score-pill-large" id="popupQuizScorePill">Score: 3 / 3 (100%)</div>
+          <div class="quiz-summary-praise" id="popupQuizSummaryPraise">You mastered this concept thoroughly!</div>
+          <div class="quiz-summary-actions">
+            <button type="button" class="btn btn-secondary" id="popupQuizRetryBtn">
+              🔄 Try Again
+            </button>
+            <button type="button" class="btn btn-primary" id="popupQuizNewBtn">
+              ✍️ New Quiz
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /tab-quiz -->
+
+    <!-- ══════════════════════════════════════════════════
+         Tab 3: History
+    ══════════════════════════════════════════════════ -->
+    <div id="tab-history" class="tab-pane" role="tabpanel">
+      <div class="history-header">
+        <span class="section-title">Recent Explanations</span>
+        <button type="button" id="clearHistoryBtn" class="link-btn danger" title="Clear all saved history">
+          Clear History
+        </button>
+      </div>
+      <div id="historyList" class="history-list">
+        <!-- Injected via popup.js -->
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         Tab 4: Settings
+    ══════════════════════════════════════════════════ -->
+    <div id="tab-settings" class="tab-pane" role="tabpanel">
+      <form id="settingsForm" class="form">
+
+        <!-- 🤖 AI Source Selector -->
+        <div class="form-section" style="background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.08));border:1px solid rgba(99,102,241,0.3);border-radius:12px;padding:16px;">
+          <label class="section-title" style="display:flex;align-items:center;gap:8px;">
+            <span>🤖</span> AI Source
+          </label>
+          <p class="field-hint" style="margin-bottom:12px;">Choose which AI powers your explanations. Ollama is free, local &amp; private — no API key needed!</p>
+
+          <div class="segmented-control" role="radiogroup" aria-label="AI Source" style="grid-template-columns:repeat(3,1fr);">
+            <label class="segment-option">
+              <input type="radio" name="aiSource" id="aiSourceAuto" value="auto" checked>
+              <span class="segment-label">
+                <span class="segment-icon">⚡</span>
+                <span class="segment-name">Auto</span>
+                <span class="segment-desc">Ollama → Gemini</span>
+              </span>
+            </label>
+            <label class="segment-option">
+              <input type="radio" name="aiSource" id="aiSourceOllama" value="ollama">
+              <span class="segment-label">
+                <span class="segment-icon">🦙</span>
+                <span class="segment-name">Ollama</span>
+                <span class="segment-desc">Free &amp; Local</span>
+              </span>
+            </label>
+            <label class="segment-option">
+              <input type="radio" name="aiSource" id="aiSourceGemini" value="gemini">
+              <span class="segment-label">
+                <span class="segment-icon">✨</span>
+                <span class="segment-name">Gemini</span>
+                <span class="segment-desc">Google AI</span>
+              </span>
+            </label>
+          </div>
+
+          <!-- Ollama status & model -->
+          <div id="ollamaSection" style="margin-top:14px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div id="ollamaStatusDot" style="width:9px;height:9px;border-radius:50%;background:#94a3b8;flex-shrink:0;"></div>
+              <span id="ollamaStatusText" class="field-hint" style="margin:0;">Checking Ollama...</span>
+              <button type="button" id="checkOllamaBtn" class="btn btn-secondary" style="margin-left:auto;padding:4px 12px;font-size:11px;">Refresh</button>
+            </div>
+            <label for="ollamaModelInput" class="field-hint" style="display:block;margin-bottom:6px;">Model (leave blank for auto-select):</label>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="ollamaModelInput" class="input" placeholder="e.g. llama3.2" style="flex:1;" autocomplete="off">
+              <button type="button" id="pullModelBtn" class="btn btn-secondary" style="white-space:nowrap;font-size:12px;">Pull Model</button>
+            </div>
+            <p class="field-hint" style="margin-top:6px;">💡 First time? Run: <code style="background:rgba(99,102,241,0.15);padding:2px 6px;border-radius:4px;font-size:11px;">ollama pull llama3.2</code></p>
+            <p class="field-hint" style="margin-top:4px;font-size:11px;color:#94a3b8;">⚠️ If you see CORS blocked (403), quit Ollama from the Windows taskbar tray &amp; reopen it.</p>
+          </div>
+        </div>
+
+        <!-- Google Gemini API Key (optional fallback) -->
+        <div class="form-section">
+          <div class="label-row">
+            <label for="apiKeyInput" class="section-title">Google Gemini API Key <span style="font-weight:400;color:var(--card-subtext);font-size:11px;">(optional fallback)</span></label>
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" class="help-link">
+              Get Free Key ↗
+            </a>
+          </div>
+          <div class="input-password-wrapper">
+            <input type="password" id="apiKeyInput" class="input" placeholder="AIzaSy... (optional if using Ollama)" autocomplete="off" spellcheck="false">
+            <button type="button" id="toggleVisibilityBtn" class="icon-button" title="Toggle visibility" aria-label="Toggle password visibility">
+              <svg id="eyeIcon" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <p class="field-hint">Only needed when using Gemini mode or as fallback. Stored locally on your device.</p>
+          <div class="test-key-row">
+            <button type="button" id="testKeyBtn" class="btn btn-secondary">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <span id="testBtnText">Test Key</span>
+            </button>
+            <div id="testStatus" class="test-status-msg" aria-live="polite"></div>
+          </div>
+        </div>
+
+
+        <!-- Voice Accent Selection -->
+        <div class="form-section">
+          <label for="voiceAccentSelect" class="section-title">Speech Synthesis Voice Accent</label>
+          <select id="voiceAccentSelect" class="input">
+            <option value="en-IN" selected>🇮🇳 Indian English (en-IN) — Recommended</option>
+            <option value="en-US">🇺🇸 US English (en-US)</option>
+            <option value="en-GB">🇬🇧 UK English (en-GB)</option>
+            <option value="en-AU">🇦🇺 Australian English (en-AU)</option>
+          </select>
+          <p class="field-hint">Natural Indian English speech with custom pacing &amp; clarity</p>
+        </div>
+
+        <!-- Default Explanation Language -->
+        <div class="form-section">
+          <label for="defaultLanguageSelect" class="section-title">Default Explanation Language</label>
+          <select id="defaultLanguageSelect" class="input">
+            <option value="English" selected>English (Default)</option>
+            <option value="Hindi">हिन्दी (Hindi)</option>
+            <option value="Bengali">বাংলা (Bengali)</option>
+            <option value="Telugu">తెలుగు (Telugu)</option>
+            <option value="Tamil">தமிழ் (Tamil)</option>
+            <option value="Marathi">मराठी (Marathi)</option>
+            <option value="Gujarati">ગુજરાતી (Gujarati)</option>
+            <option value="Kannada">ಕನ್ನಡ (Kannada)</option>
+            <option value="Malayalam">മലയാളം (Malayalam)</option>
+            <option value="Punjabi">ਪੰਜਾਬੀ (Punjabi)</option>
+            <option value="Spanish">Español (Spanish)</option>
+            <option value="French">Français (French)</option>
+            <option value="German">Deutsch (German)</option>
+            <option value="Japanese">日本語 (Japanese)</option>
+            <option value="Chinese">中文 (Chinese)</option>
+            <option value="Arabic">العربية (Arabic)</option>
+          </select>
+          <p class="field-hint">Automatically explain concepts in your preferred language</p>
+        </div>
+
+        <!-- Indian Mentor & Analogies -->
+        <div class="form-section">
+          <label class="toggle-row">
+            <div>
+              <span class="section-title">Indian Mentor &amp; Relatable Analogies</span>
+              <p class="field-hint">Uses simple relatable examples (trains, chai, daily tech) for super simple learning</p>
+            </div>
+            <input type="checkbox" id="indianAnalogies" class="toggle-checkbox" checked>
+          </label>
+        </div>
+
+        <!-- Mentor Persona Selection -->
+        <div class="form-section">
+          <label class="section-title">🎭 Mentor Persona &amp; Voice Style</label>
+          <div class="persona-switch-grid" role="radiogroup" aria-label="Mentor Persona">
+            <label class="persona-card-opt" title="Warm Indian English mentor with daily analogies">
+              <input type="radio" name="mentorPersona" value="maya" checked>
+              <div class="persona-card-content">
+                <div class="persona-card-top">
+                  <span class="persona-avatar-badge">👩‍🏫</span>
+                  <strong>Maya</strong>
+                  <span class="persona-tag-pill">Default</span>
+                </div>
+                <p class="persona-card-desc">Warm Indian English mentor with chai, train, and cricket everyday analogies.</p>
+              </div>
+            </label>
+            <label class="persona-card-opt" title="Academic researcher grounded in first principles">
+              <input type="radio" name="mentorPersona" value="rao">
+              <div class="persona-card-content">
+                <div class="persona-card-top">
+                  <span class="persona-avatar-badge">🎓</span>
+                  <strong>Prof. Rao</strong>
+                  <span class="persona-tag-pill">Academic</span>
+                </div>
+                <p class="persona-card-desc">Formal scholar grounded in first principles, theoretical mechanics &amp; citations.</p>
+              </div>
+            </label>
+            <label class="persona-card-opt" title="FAANG Senior Staff Software Architect">
+              <input type="radio" name="mentorPersona" value="priya">
+              <div class="persona-card-content">
+                <div class="persona-card-top">
+                  <span class="persona-avatar-badge">⚡</span>
+                  <strong>Priya</strong>
+                  <span class="persona-tag-pill">Architect</span>
+                </div>
+                <p class="persona-card-desc">Senior Staff Engineer focus: Big-O, scalability, architecture &amp; zero fluff.</p>
+              </div>
+            </label>
+            <label class="persona-card-opt" title="Kindergarten & Playground metaphors for beginners">
+              <input type="radio" name="mentorPersona" value="eli5">
+              <div class="persona-card-content">
+                <div class="persona-card-top">
+                  <span class="persona-avatar-badge">🐣</span>
+                  <strong>ELI5 Buddy</strong>
+                  <span class="persona-tag-pill">Playground</span>
+                </div>
+                <p class="persona-card-desc">Playground &amp; toy block metaphors for beginners. Zero confusing jargon.</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Avatar Companion Skin Aesthetic -->
+        <div class="form-section">
+          <label class="section-title">🎨 Avatar Companion Skin</label>
+          <div class="skin-switch-grid" role="radiogroup" aria-label="Avatar Skin">
+            <label class="skin-card-opt" title="Classic Indigo & Sky Gradient">
+              <input type="radio" name="avatarSkin" value="classic" checked>
+              <div class="skin-card-content">
+                <span class="skin-swatch skin-swatch-classic"></span>
+                <span>Classic Indigo</span>
+              </div>
+            </label>
+            <label class="skin-card-opt" title="Electric Neon Cyan & Magenta">
+              <input type="radio" name="avatarSkin" value="cyberpunk">
+              <div class="skin-card-content">
+                <span class="skin-swatch skin-swatch-cyberpunk"></span>
+                <span>Cyberpunk</span>
+              </div>
+            </label>
+            <label class="skin-card-opt" title="Minimalist Monochrome Slate">
+              <input type="radio" name="avatarSkin" value="monochrome">
+              <div class="skin-card-content">
+                <span class="skin-swatch skin-swatch-monochrome"></span>
+                <span>Monochrome</span>
+              </div>
+            </label>
+            <label class="skin-card-opt" title="Retro 8-Bit Pixel Arcade">
+              <input type="radio" name="avatarSkin" value="pixel">
+              <div class="skin-card-content">
+                <span class="skin-swatch skin-swatch-pixel"></span>
+                <span>8-Bit Retro</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Explanation Style -->
+        <div class="form-section">
+          <label class="section-title">Explanation Style</label>
+          <div class="segmented-control" role="radiogroup" aria-label="Explanation Style">
+            <label class="segment-option">
+              <input type="radio" name="explainStyle" value="simple" checked>
+              <span class="segment-label">
+                <span class="segment-icon">🐣</span>
+                <span class="segment-name">Simple</span>
+                <span class="segment-desc">ELI5 / Analogies</span>
+              </span>
+            </label>
+            <label class="segment-option">
+              <input type="radio" name="explainStyle" value="detailed">
+              <span class="segment-label">
+                <span class="segment-icon">📖</span>
+                <span class="segment-name">Detailed</span>
+                <span class="segment-desc">Balanced &amp; Full</span>
+              </span>
+            </label>
+            <label class="segment-option">
+              <input type="radio" name="explainStyle" value="technical">
+              <span class="segment-label">
+                <span class="segment-icon">⚙️</span>
+                <span class="segment-name">Technical</span>
+                <span class="segment-desc">In-Depth Specs</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Panel Theme -->
+        <div class="form-section">
+          <label class="section-title">Color Theme (Both Panels)</label>
+          <div class="theme-switch-group" role="radiogroup" aria-label="Overlay Theme">
+            <label class="theme-option" title="Modern Dark Slate & Indigo">
+              <input type="radio" name="overlayTheme" value="dark" checked>
+              <span class="theme-box">
+                <span class="theme-swatch swatch-dark"></span>
+                <span>Dark Slate</span>
+              </span>
+            </label>
+            <label class="theme-option" title="Crisp Porcelain White & Slate">
+              <input type="radio" name="overlayTheme" value="light">
+              <span class="theme-box">
+                <span class="theme-swatch swatch-light"></span>
+                <span>Pure Light</span>
+              </span>
+            </label>
+            <label class="theme-option" title="Electric Neon Cyan & Magenta">
+              <input type="radio" name="overlayTheme" value="cyberpunk">
+              <span class="theme-box">
+                <span class="theme-swatch swatch-cyberpunk"></span>
+                <span>Cyberpunk</span>
+              </span>
+            </label>
+            <label class="theme-option" title="Pure Pitch Black OLED">
+              <input type="radio" name="overlayTheme" value="midnight">
+              <span class="theme-box">
+                <span class="theme-swatch swatch-midnight"></span>
+                <span>Midnight</span>
+              </span>
+            </label>
+            <label class="theme-option" title="Cosmic Violet & Emerald Teal">
+              <input type="radio" name="overlayTheme" value="aurora">
+              <span class="theme-box">
+                <span class="theme-swatch swatch-aurora"></span>
+                <span>Aurora</span>
+              </span>
+            </label>
+            <label class="theme-option" title="Luxury Jade & Forest Onyx">
+              <input type="radio" name="overlayTheme" value="emerald">
+              <span class="theme-box">
+                <span class="theme-swatch swatch-emerald"></span>
+                <span>Emerald</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Panel Background Style -->
+        <div class="form-section">
+          <label class="section-title">Background Style (Both Panels)</label>
+          <div class="bg-switch-group" role="radiogroup" aria-label="Background Style">
+            <label class="bg-option" title="Soft Ambient Mesh Glow">
+              <input type="radio" name="overlayBgStyle" value="glow" checked>
+              <span class="bg-box">
+                <span class="bg-swatch swatch-bg-glow"></span>
+                <span>Soft Glow</span>
+              </span>
+            </label>
+            <label class="bg-option" title="Futuristic Cyber Grid">
+              <input type="radio" name="overlayBgStyle" value="grid">
+              <span class="bg-box">
+                <span class="bg-swatch swatch-bg-grid"></span>
+                <span>Cyber Grid</span>
+              </span>
+            </label>
+            <label class="bg-option" title="Tech Dot Matrix Pattern">
+              <input type="radio" name="overlayBgStyle" value="dots">
+              <span class="bg-box">
+                <span class="bg-swatch swatch-bg-dots"></span>
+                <span>Dot Matrix</span>
+              </span>
+            </label>
+            <label class="bg-option" title="Cosmic Starfield & Nebula">
+              <input type="radio" name="overlayBgStyle" value="stars">
+              <span class="bg-box">
+                <span class="bg-swatch swatch-bg-stars"></span>
+                <span>Starfield</span>
+              </span>
+            </label>
+            <label class="bg-option" title="Radiant Flowing Gradient Waves">
+              <input type="radio" name="overlayBgStyle" value="waves">
+              <span class="bg-box">
+                <span class="bg-swatch swatch-bg-waves"></span>
+                <span>Radiant Flow</span>
+              </span>
+            </label>
+            <label class="bg-option" title="Ultra Frosted Glassmorphism">
+              <input type="radio" name="overlayBgStyle" value="glass">
+              <span class="bg-box">
+                <span class="bg-swatch swatch-bg-glass"></span>
+                <span>Glass Prism</span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Quick Action Button -->
+        <div class="form-section">
+          <label class="toggle-row">
+            <div>
+              <span class="section-title">Quick Action Button</span>
+              <p class="field-hint">Show floating button when highlighting text</p>
+            </div>
+            <input type="checkbox" id="showFloatingButton" class="toggle-checkbox" checked>
+          </label>
+        </div>
+
+        <!-- Instant Auto-Explain on Highlight -->
+        <div class="form-section">
+          <label class="toggle-row">
+            <div>
+              <span class="section-title">⚡ Instant Auto-Explain on Highlight</span>
+              <p class="field-hint">Automatically explain selected text after 400ms without clicking the floating button</p>
+            </div>
+            <input type="checkbox" id="autoExplainOnSelect" class="toggle-checkbox">
+          </label>
+        </div>
+
+
+        <!-- Auto-Read TTS -->
+        <div class="form-section">
+          <label class="toggle-row">
+            <div>
+              <span class="section-title">Auto-Read Explanations (TTS)</span>
+              <p class="field-hint">Automatically speak explanations aloud when opened</p>
+            </div>
+            <input type="checkbox" id="autoSpeak" class="toggle-checkbox" checked>
+          </label>
+        </div>
+
+        <!-- ── Jarvis Assistant Automation Settings ── -->
+        <div class="settings-divider" style="margin:16px 0 12px;border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;">
+          <span style="font-size:11px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.8px;">🤖 Jarvis Automation &amp; Voice Settings</span>
+        </div>
+
+        <!-- Auto-Launch Jarvis Tab -->
+        <div class="form-section">
+          <label class="toggle-row">
+            <div>
+              <span class="section-title">🚀 Auto-Launch Jarvis Tab on Open</span>
+              <p class="field-hint">Automatically open Jarvis tab whenever extension or side panel is opened</p>
+            </div>
+            <input type="checkbox" id="autoLaunchJarvis" class="toggle-checkbox">
+          </label>
+        </div>
+
+        <!-- Continuous Voice Commands (Always Listening) -->
+        <div class="form-section">
+          <label class="toggle-row">
+            <div>
+              <span class="section-title">🎙️ Continuous Voice Mode (Always Listening)</span>
+              <p class="field-hint">Auto-listens when opened and automatically re-listens after executing commands</p>
+            </div>
+            <input type="checkbox" id="jarvisContinuousListen" class="toggle-checkbox">
+          </label>
+        </div>
+
+        <!-- Save -->
+        <div class="button-group">
+          <button type="submit" id="saveBtn" class="btn btn-primary">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Save Settings</span>
+          </button>
+        </div>
+
+      </form>
+    </div><!-- /tab-settings -->
+
+    <!-- ══════════════════════════════════════════════════
+         Tab 6: Jarvis AI Automation Assistant (Python Connected)
+    ══════════════════════════════════════════════════ -->
+    <div id="tab-jarvis" class="tab-pane" role="tabpanel">
+      <!-- Assistant Hero Card: 3D VRoid Character & Cyber Orb -->
+      <div class="jarvis-hero-card">
+        <!-- 3D VRoid Character Viewport -->
+        <div class="jarvis-vrm-wrapper" id="jarvisVrmWrapper">
+          <iframe id="jarvisAvatarFrame" src="avatar-view.html" class="jarvis-vrm-iframe" frameborder="0"></iframe>
+          <div class="jarvis-vrm-badge">
+            <span class="vrm-live-dot"></span>
+            <span id="jarvisVrmStatus">3D VROID LIVE</span>
+          </div>
+          <div class="jarvis-vrm-actions">
+            <button type="button" class="jarvis-vrm-btn" id="jarvisToggleOrbBtn" title="Switch between 3D Character & Cyber Orb">Orb</button>
+          </div>
+        </div>
+
+        <!-- Cyber Orb Viewport (can be toggled) -->
+        <div class="jarvis-orb-wrapper" id="jarvisOrbWrapper" style="display:none;">
+          <div class="jarvis-orb" id="jarvisOrb">
+            <div class="jarvis-orb-core"></div>
+            <div class="jarvis-orb-ring ring-1"></div>
+            <div class="jarvis-orb-ring ring-2"></div>
+          </div>
+          <button type="button" class="jarvis-vrm-btn" id="jarvisToggle3DBtn" style="margin-top:4px;" title="Switch to 3D Character">3D Avatar</button>
+        </div>
+        <div class="jarvis-status-header">
+          <div class="jarvis-title-row">
+            <h2 class="jarvis-title">JARVIS AI Assistant</h2>
+            <span class="jarvis-badge" id="jarvisStatusBadge">
+              <span class="jarvis-dot checking"></span>
+              <span id="jarvisStatusText">Connecting...</span>
+            </span>
+          </div>
+          <p class="jarvis-subtitle" id="jarvisSubtitle">Python Desktop &amp; Web Automation Commander</p>
+        </div>
+      </div>
+
+      <!-- Background Voice Master Switch (Runs even when popup is closed) -->
+      <div class="jarvis-master-card" id="jarvisMasterCard">
+        <div class="jarvis-master-info">
+          <div class="jarvis-master-title">
+            <span>⚡ Background Voice Mode</span>
+            <span class="jarvis-live-pill" id="jarvisLivePill" style="display:none;">LIVE IN BACKGROUND</span>
+          </div>
+          <p class="jarvis-master-desc">Runs in background — speak commands anytime even when this panel is closed!</p>
+        </div>
+        <label class="toggle-row" style="padding:0;margin:0;cursor:pointer;" title="Turn background voice on/off">
+          <input type="checkbox" id="jarvisBackgroundListenToggle" class="toggle-checkbox">
+        </label>
+      </div>
+
+      <!-- Voice Selector Row -->
+      <div class="jarvis-voice-selector-row">
+        <span class="jarvis-voice-label">🎙️ Voice:</span>
+        <button type="button" class="jarvis-voice-pill active" id="jarvisVoiceFemaleBtn" data-voice="female_neural">
+          <span>🌸</span> Sweet Female
+        </button>
+        <button type="button" class="jarvis-voice-pill" id="jarvisVoiceMaleBtn" data-voice="male_david">
+          <span>🤖</span> Classic Male
+        </button>
+      </div>
+
+      <!-- Quick Action Commands Chips -->
+      <div class="jarvis-section">
+        <span class="jarvis-section-label">⚡ Quick Actions &amp; Commands</span>
+        <div class="jarvis-chips-grid">
+          <button type="button" class="jarvis-chip" data-cmd="search latest news on Google">
+            <span>🔍</span> Google Search
+          </button>
+          <button type="button" class="jarvis-chip" data-cmd="open youtube and search lofi beats">
+            <span>▶️</span> YouTube
+          </button>
+          <button type="button" class="jarvis-chip" data-cmd="open command prompt">
+            <span>💻</span> CMD
+          </button>
+          <button type="button" class="jarvis-chip" data-cmd="what is the time and date">
+            <span>🕒</span> Time &amp; Date
+          </button>
+        </div>
+      </div>
+
+      <!-- Command Input Bar with Voice Recognition -->
+      <div class="jarvis-command-box">
+        <div class="jarvis-input-wrapper">
+          <input type="text" id="jarvisCommandInput" class="jarvis-input" placeholder="e.g. 'search Python on Google' or 'open youtube'" autocomplete="off" />
+          <button type="button" id="jarvisMicBtn" class="jarvis-mic-btn" title="Speak command (Voice Recognition)">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </button>
+          <button type="button" id="jarvisSendBtn" class="jarvis-send-btn" title="Execute Command">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+        <div class="jarvis-mic-indicator" id="jarvisMicIndicator" style="display:none;">
+          <span class="mic-wave"></span><span class="mic-wave"></span><span class="mic-wave"></span>
+          <span class="mic-listening-text">Listening... Speak now</span>
+        </div>
+      </div>
+
+      <!-- Live Activity & Command Execution Feed -->
+      <div class="jarvis-section">
+        <div class="jarvis-feed-header">
+          <span class="jarvis-section-label">📜 Activity &amp; Response Log</span>
+          <button type="button" id="jarvisClearFeedBtn" class="jarvis-clear-feed" title="Clear log">Clear</button>
+        </div>
+        <div class="jarvis-feed" id="jarvisFeed">
+          <div class="jarvis-feed-item system">
+            <span class="feed-icon">🤖</span>
+            <div class="feed-content">
+              <strong>Jarvis Ready:</strong> Type a command or click the mic button to search the web, open websites, or launch desktop tools.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Server Connection Footer Note -->
+      <div class="jarvis-server-info" id="jarvisServerInfo">
+        <span class="server-host-tag">Python API: <code>127.0.0.1:8000</code></span>
+        <label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#94a3b8;cursor:pointer;" title="Automatically keep listening for voice commands">
+          <input type="checkbox" id="jarvisQuickAutoListen" style="accent-color:#38bdf8;cursor:pointer;">
+          <span style="font-weight:600;">🎙️ Always Listen</span>
+        </label>
+        <button type="button" id="jarvisRetryConnBtn" class="jarvis-retry-btn">Reconnect</button>
+      </div>
+    </div>
+
+    <!-- ── Hands-Free "Maya Live Talk" Call Overlay Modal ── -->
+    <div id="liveCallOverlay" class="live-call-overlay" style="display:none;" aria-modal="true" role="dialog">
+      <div class="live-call-backdrop"></div>
+      <div class="live-call-container">
+        <div class="live-call-header">
+          <div class="live-call-status-pill">
+            <span class="live-pulse-dot"></span>
+            <span id="liveCallStatus">Maya Live Talk</span>
+          </div>
+          <button type="button" id="liveCallCloseBtn" class="live-call-close" title="End Live Talk">✕</button>
+        </div>
+
+        <div class="live-call-stage">
+          <div class="live-radar-waves" id="liveRadarWaves">
+            <div class="live-wave-circle w1"></div>
+            <div class="live-wave-circle w2"></div>
+            <div class="live-wave-circle w3"></div>
+          </div>
+
+          <div class="live-avatar-orb" id="liveAvatarOrb">
+            <svg class="live-avatar-svg" viewBox="0 0 64 64" fill="none">
+              <circle class="avatar-halo" cx="32" cy="7" r="4" fill="#38bdf8"/>
+              <line x1="32" y1="11" x2="32" y2="16" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round"/>
+              <rect x="10" y="16" width="44" height="40" rx="16" fill="#1e293b" stroke="#818cf8" stroke-width="2"/>
+              <rect x="14" y="20" width="36" height="32" rx="11" fill="#090d16"/>
+              <circle cx="18" cy="38" r="2.5" fill="#f43f5e" opacity="0.65"/>
+              <circle cx="46" cy="38" r="2.5" fill="#f43f5e" opacity="0.65"/>
+              <g class="avatar-eyes">
+                <ellipse class="avatar-eye left-eye" cx="24" cy="31" rx="3.5" ry="4.5" fill="#38bdf8"/>
+                <ellipse class="avatar-eye right-eye" cx="40" cy="31" rx="3.5" ry="4.5" fill="#38bdf8"/>
+                <circle cx="25" cy="30" r="1.2" fill="#ffffff"/>
+                <circle cx="41" cy="30" r="1.2" fill="#ffffff"/>
+              </g>
+              <path class="avatar-mouth" id="liveAvatarMouth" d="M26 41 Q32 46 38 41" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+
+          <div class="live-soundwave-bars" id="liveSoundwaveBars">
+            <span class="lw-bar"></span>
+            <span class="lw-bar"></span>
+            <span class="lw-bar"></span>
+            <span class="lw-bar"></span>
+            <span class="lw-bar"></span>
+            <span class="lw-bar"></span>
+            <span class="lw-bar"></span>
+          </div>
+
+          <div class="live-persona-badge" id="livePersonaBadge">Maya • Warm Mentor</div>
+        </div>
+
+        <div class="live-transcript-card" id="liveTranscriptCard">
+          <div class="live-transcript-sender" id="liveTranscriptSender">Maya</div>
+          <div class="live-transcript-body" id="liveTranscriptBody">"Hey there! I'm listening. Ask me any question, discuss a tricky code bug, or explore a topic hands-free."</div>
+        </div>
+
+        <div class="live-call-controls">
+          <button type="button" id="liveMuteBtn" class="btn-live-ctrl btn-live-mute" title="Mute/Unmute microphone">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+            <span id="liveMuteText">Mute</span>
+          </button>
+
+          <button type="button" id="liveEndCallBtn" class="btn-live-ctrl btn-live-end" title="End Live Talk session">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-6-6 19.8 19.8 0 0 1-3.12-8.69A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"></path>
+              <line x1="23" y1="1" x2="1" y2="23"></line>
+            </svg>
+            <span>End Call</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Bias Meter & Fact Checker Modal ── -->
+    <div id="biasModalOverlay" class="bias-modal-overlay" style="display:none;">
+      <div class="bias-modal-container">
+        <div class="bias-modal-header">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:18px;">⚖️</span>
+            <span class="bias-modal-title">Bias Meter &amp; Fact Check</span>
+          </div>
+          <button type="button" id="closeBiasModalBtn" class="icon-button" title="Close">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div id="biasModalContent" class="bias-modal-body">
+          <!-- Populated dynamically via popup.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Toast Notification ── -->
+    <div id="toast" class="toast" role="alert" aria-live="polite">
+      <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span id="toastMessage">Settings saved!</span>
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer class="footer">
+      <span>Google Gemini Powered</span>
+      <span class="status-dot-wrapper">
+        <span class="status-dot active"></span> Ready (Alt+E)
+      </span>
+    </footer>
+
+  </div><!-- /container -->
+  <script src="lib/three.min.js"></script>
+  <script src="lib/GLTFLoader.js"></script>
+  <script src="lib/three-vrm.js"></script>
+  <script src="vrm-avatar.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JARVIS 3D Avatar Viewport</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+      user-select: none;
+    }
+    #container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 30%, rgba(30, 41, 59, 0.4) 0%, rgba(8, 14, 28, 0.9) 100%);
+    }
+    #avatarCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+    }
+    #avatarCanvas:active {
+      cursor: grabbing;
+    }
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(8, 14, 28, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 10;
+      transition: opacity 0.3s ease;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(56, 189, 248, 0.2);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 6px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-text {
+      color: #38bdf8;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <canvas id="avatarCanvas"></canvas>
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="spinner"></div>
+      <span class="loading-text">Loading 3D Model...</span>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const canvas = document.getElementById('avatarCanvas');
+      const loaderEl = document.getElementById('loadingOverlay');
+
+      // Helper to dynamically load a script from URL
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = src;
+          s.crossOrigin = 'anonymous';
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      }
+
+      // Helper to execute raw JS code as a script tag
+      function injectScriptCode(code) {
+        const s = document.createElement('script');
+        s.textContent = code;
+        document.head.appendChild(s);
+      }
+
+      // Step 1: Ensure Three.js + GLTFLoader are loaded (fast 0ms cache first)
+      async function initEngine() {
+        if (typeof THREE === 'undefined' || !THREE.GLTFLoader) {
+          let loaded = false;
+
+          // 1. Try instant localStorage cache (0ms offline startup)
+          try {
+            const cachedThree = localStorage.getItem('__jarvis_three_js');
+            const cachedGLTF = localStorage.getItem('__jarvis_gltf_loader');
+            if (cachedThree && cachedGLTF) {
+              injectScriptCode(cachedThree);
+              injectScriptCode(cachedGLTF);
+              if (typeof THREE !== 'undefined' && THREE.GLTFLoader) {
+                loaded = true;
+              }
+            }
+          } catch (_) {}
+
+          // 2. Try local extension bundled engine
+          if (!loaded) {
+            try {
+              await loadScript('lib/three_bundle.js');
+              if (typeof THREE !== 'undefined' && THREE.GLTFLoader) loaded = true;
+            } catch (_) {}
+          }
+
+          if (!loaded) {
+            try {
+              await loadScript('lib/three.min.js');
+              await loadScript('lib/GLTFLoader.js');
+              if (typeof THREE !== 'undefined' && THREE.GLTFLoader) loaded = true;
+            } catch (_) {}
+          }
+
+          // 3. High-speed CDN fetch with background cache write
+          if (!loaded) {
+            try {
+              const threeUrl = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+              const gltfUrl = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js';
+
+              // Fetch both in parallel for fastest possible start
+              const [resThree, resGLTF] = await Promise.all([
+                fetch(threeUrl).then(r => r.text()),
+                fetch(gltfUrl).then(r => r.text())
+              ]);
+
+              injectScriptCode(resThree);
+              injectScriptCode(resGLTF);
+
+              if (typeof THREE !== 'undefined' && THREE.GLTFLoader) {
+                loaded = true;
+                try {
+                  localStorage.setItem('__jarvis_three_js', resThree);
+                  localStorage.setItem('__jarvis_gltf_loader', resGLTF);
+                } catch (_) {}
+              }
+            } catch (e2) {
+              // Fallback to script tag injection
+              try {
+                await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
+                await loadScript('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js');
+                if (typeof THREE !== 'undefined' && THREE.GLTFLoader) loaded = true;
+              } catch (e3) {
+                console.error('[AvatarView] Failed to load Three.js libraries:', e3);
+                loaderEl.innerHTML = '<span style="color:#ef4444;font-size:10px;text-align:center;padding:10px;">Please check internet connection or restart assistant.</span>';
+                return;
+              }
+            }
+          }
+        }
+
+        // Determine VRM Model URL from query param, extension URL, or relative path
+        let modelUrl = '';
+        try {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('model')) {
+            modelUrl = decodeURIComponent(params.get('model'));
+          }
+        } catch (_) {}
+
+        if (!modelUrl) {
+          try {
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL) {
+              modelUrl = chrome.runtime.getURL('AvatarSample_A.vrm');
+            }
+          } catch (_) {}
+        }
+        if (!modelUrl) {
+          modelUrl = 'AvatarSample_A.vrm';
+        }
+
+        startAvatar(modelUrl);
+      }
+
+      let activeModel = null;
+      let modelRotationY = 0;
+
+      function startAvatar(modelUrl) {
+        const width = canvas.clientWidth || 300;
+        const height = canvas.clientHeight || 300;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(26, width / height, 0.1, 20.0);
+        camera.position.set(0, 1.34, 0.78);
+        camera.lookAt(0, 1.30, 0);
+
+        const renderer = new THREE.WebGLRenderer({
+          canvas: canvas,
+          alpha: true,
+          antialias: true,
+          powerPreference: 'high-performance'
+        });
+        renderer.setSize(width, height, false);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+
+        // Lighting
+        const ambient = new THREE.AmbientLight(0xffffff, 0.85);
+        scene.add(ambient);
+
+        const keyLight = new THREE.DirectionalLight(0xfff3e0, 0.95);
+        keyLight.position.set(0.8, 1.8, 1.2);
+        scene.add(keyLight);
+
+        const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.9);
+        rimLight.position.set(-1.0, 1.6, -1.0);
+        scene.add(rimLight);
+
+        const fillLight = new THREE.DirectionalLight(0x818cf8, 0.35);
+        fillLight.position.set(0, 0.6, 1.0);
+        scene.add(fillLight);
+
+        let headBone = null;
+        let chestBone = null;
+        const morphMap = {};
+
+        // Load VRM glTF binary
+        const loader = new THREE.GLTFLoader();
+        loader.load(
+          modelUrl,
+          (gltf) => {
+            const root = gltf.scene || gltf.scenes[0];
+            root.rotation.y = 0; // Face forward towards user
+            activeModel = root;
+            scene.add(root);
+
+            root.traverse((obj) => {
+              if (obj.isBone) {
+                const n = obj.name || '';
+                if (!headBone && (n.includes('Head') || n.includes('head') || n === 'J_Bip_C_Head')) {
+                  headBone = obj;
+                } else if (!chestBone && (n.includes('Chest') || n.includes('chest') || n === 'J_Bip_C_Chest')) {
+                  chestBone = obj;
+                }
+              }
+              if (obj.isMesh && obj.morphTargetDictionary && obj.morphTargetInfluences) {
+                const dict = obj.morphTargetDictionary;
+                for (const key in dict) {
+                  const idx = dict[key];
+                  const lower = key.toLowerCase();
+                  if (lower.includes('blink') || lower === 'fcl_eye_close') {
+                    morphMap['blink'] = { mesh: obj, index: idx };
+                  } else if (lower === 'aa' || lower.includes('mth_a') || lower === 'fcl_mth_a' || lower === 'a') {
+                    morphMap['aa'] = { mesh: obj, index: idx };
+                  } else if (lower.includes('joy') || lower.includes('happy') || lower === 'fcl_all_joy') {
+                    morphMap['happy'] = { mesh: obj, index: idx };
+                  }
+                }
+              }
+            });
+
+            // Fade out loader
+            loaderEl.style.opacity = '0';
+            setTimeout(() => { loaderEl.style.display = 'none'; }, 300);
+
+            // Notify parent window
+            window.parent.postMessage({ type: 'AVATAR_LOADED' }, '*');
+          },
+          undefined,
+          (err) => {
+            console.warn('[AvatarView] Primary load error:', err);
+            // If primary URL failed and it wasn't already local python, try local python server
+            if (modelUrl !== 'http://127.0.0.1:8000/avatar/model') {
+              console.log('[AvatarView] Retrying with http://127.0.0.1:8000/avatar/model ...');
+              loader.load(
+                'http://127.0.0.1:8000/avatar/model',
+                (gltf2) => {
+                  const root2 = gltf2.scene || gltf2.scenes[0];
+                  root2.rotation.y = 0; // Face forward towards user
+                  activeModel = root2;
+                  scene.add(root2);
+                  root2.traverse((obj) => {
+                    if (obj.isBone) {
+                      const n = obj.name || '';
+                      if (!headBone && (n.includes('Head') || n.includes('head') || n === 'J_Bip_C_Head')) headBone = obj;
+                      else if (!chestBone && (n.includes('Chest') || n.includes('chest') || n === 'J_Bip_C_Chest')) chestBone = obj;
+                    }
+                    if (obj.isMesh && obj.morphTargetDictionary && obj.morphTargetInfluences) {
+                      const dict = obj.morphTargetDictionary;
+                      for (const key in dict) {
+                        const idx = dict[key];
+                        const lower = key.toLowerCase();
+                        if (lower.includes('blink') || lower === 'fcl_eye_close') morphMap['blink'] = { mesh: obj, index: idx };
+                        else if (lower === 'aa' || lower.includes('mth_a') || lower === 'fcl_mth_a' || lower === 'a') morphMap['aa'] = { mesh: obj, index: idx };
+                        else if (lower.includes('joy') || lower.includes('happy') || lower === 'fcl_all_joy') morphMap['happy'] = { mesh: obj, index: idx };
+                      }
+                    }
+                  });
+                  loaderEl.style.opacity = '0';
+                  setTimeout(() => { loaderEl.style.display = 'none'; }, 300);
+                  window.parent.postMessage({ type: 'AVATAR_LOADED' }, '*');
+                },
+                undefined,
+                (err2) => {
+                  console.error('[AvatarView] Secondary load error:', err2);
+                  loaderEl.innerHTML = '<span style="color:#ef4444;font-size:10px;text-align:center;padding:8px;">Model Load Error</span>';
+                }
+              );
+            } else {
+              loaderEl.innerHTML = '<span style="color:#ef4444;font-size:10px;text-align:center;padding:8px;">Model Load Error</span>';
+            }
+          }
+        );
+
+        // Animation State
+        let isSpeaking = false;
+        let speechEndTime = 0;
+        let currentMouth = 0;
+        let targetMouth = 0;
+        let blinkTimer = 0;
+        let nextBlink = 3.0;
+        let isBlinking = false;
+        let blinkProgress = 0;
+
+        let targetLookX = 0;
+        let targetLookY = 0;
+        let currentLookX = 0;
+        let currentLookY = 0;
+
+        function setMorph(name, val) {
+          const m = morphMap[name];
+          if (m && m.mesh && m.mesh.morphTargetInfluences) {
+            m.mesh.morphTargetInfluences[m.index] = val;
+          }
+        }
+
+        window.addEventListener('mousemove', (e) => {
+          const nx = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+          const ny = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+          targetLookX = Math.max(-0.25, Math.min(0.25, nx * 0.25));
+          targetLookY = Math.max(-0.18, Math.min(0.18, ny * 0.18));
+        });
+
+        // Interactive mouse rotation on avatar canvas
+        let isDraggingModel = false;
+        let dragStartX = 0;
+
+        canvas.addEventListener('mousedown', (e) => {
+          if (e.button === 0) {
+            isDraggingModel = true;
+            dragStartX = e.clientX;
+          }
+        });
+        window.addEventListener('mousemove', (e) => {
+          if (isDraggingModel && activeModel) {
+            const deltaX = e.clientX - dragStartX;
+            dragStartX = e.clientX;
+            modelRotationY += deltaX * 0.012;
+            activeModel.rotation.y = modelRotationY;
+          }
+        });
+        window.addEventListener('mouseup', () => {
+          isDraggingModel = false;
+        });
+        canvas.addEventListener('dblclick', () => {
+          if (activeModel) {
+            modelRotationY = 0;
+            activeModel.rotation.y = 0;
+          }
+        });
+
+        // Efficient ResizeObserver instead of layout-thrashing per-frame clientWidth queries
+        if (window.ResizeObserver) {
+          const ro = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+              const rect = entry.contentRect;
+              if (rect.width > 0 && rect.height > 0) {
+                camera.aspect = rect.width / rect.height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(rect.width, rect.height, false);
+              }
+            }
+          });
+          ro.observe(canvas.parentElement || canvas);
+        } else {
+          window.addEventListener('resize', () => {
+            const w = canvas.clientWidth || 300;
+            const h = canvas.clientHeight || 300;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h, false);
+          });
+        }
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+          requestAnimationFrame(animate);
+
+          const delta = clock.getDelta();
+          const elapsed = clock.getElapsedTime();
+
+          currentLookX += (targetLookX - currentLookX) * 0.08;
+          currentLookY += (targetLookY - currentLookY) * 0.08;
+
+          // Head Movement
+          if (headBone) {
+            const idleX = Math.sin(elapsed * 0.8) * 0.025;
+            const idleY = Math.sin(elapsed * 0.5) * 0.035;
+            const idleZ = Math.sin(elapsed * 0.6) * 0.008;
+            const speechNod = isSpeaking ? Math.sin(elapsed * 9) * 0.025 : 0;
+
+            headBone.rotation.y = idleY + currentLookX;
+            headBone.rotation.x = idleX + currentLookY + speechNod;
+            headBone.rotation.z = idleZ;
+          }
+
+          // Breathing
+          if (chestBone) {
+            chestBone.rotation.x = Math.sin(elapsed * 1.6) * 0.012;
+          }
+
+          // Blinking
+          blinkTimer += delta;
+          if (!isBlinking && blinkTimer >= nextBlink) {
+            isBlinking = true;
+            blinkProgress = 0;
+            blinkTimer = 0;
+            nextBlink = 2.5 + Math.random() * 3.0;
+          }
+          if (isBlinking) {
+            blinkProgress += delta * 7.5;
+            let bw = 0;
+            if (blinkProgress <= 0.5) bw = blinkProgress * 2.0;
+            else if (blinkProgress <= 1.0) bw = (1.0 - blinkProgress) * 2.0;
+            else { isBlinking = false; bw = 0; }
+            setMorph('blink', Math.max(0, Math.min(1, bw)));
+          }
+
+          // Lip Sync
+          if (isSpeaking) {
+            if (performance.now() > speechEndTime && speechEndTime > 0) {
+              isSpeaking = false;
+              targetMouth = 0;
+            } else {
+              const fastVowel = Math.sin(elapsed * 16.0) * 0.35;
+              const slowVowel = Math.sin(elapsed * 7.0) * 0.25;
+              targetMouth = Math.max(0.15, Math.min(0.85, 0.45 + fastVowel + slowVowel));
+            }
+          } else {
+            targetMouth = 0;
+          }
+
+          currentMouth += (targetMouth - currentMouth) * 0.25;
+          if (Math.abs(currentMouth) < 0.01) currentMouth = 0;
+          setMorph('aa', currentMouth);
+
+          renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Listen for messages from parent window
+        window.addEventListener('message', (e) => {
+          const msg = e.data;
+          if (!msg || !msg.type) return;
+
+          if (msg.type === 'SPEAK_START') {
+            isSpeaking = true;
+            speechEndTime = performance.now() + (msg.duration || 3000);
+            setMorph('happy', 0.8);
+            setTimeout(() => { setMorph('happy', 0); }, (msg.duration || 3000) + 300);
+          } else if (msg.type === 'SPEAK_END') {
+            isSpeaking = false;
+            speechEndTime = 0;
+            targetMouth = 0;
+            setMorph('happy', 0);
+          } else if (msg.type === 'EXPRESSION') {
+            setMorph(msg.name || 'happy', msg.weight !== undefined ? msg.weight : 1.0);
+          }
+        });
+      }
+
+      initEngine();
+    })();
+  </script>
+</body>
+</html>
